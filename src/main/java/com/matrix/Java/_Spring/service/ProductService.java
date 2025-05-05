@@ -16,4 +16,6 @@ public interface ProductService {
     ProductDto update(Integer id, CreateProductRequest createProductRequest);
 
     void delete(Integer id);
+
+    List<ProductDto> getProductsByCategory(Integer categoryId);
 }
