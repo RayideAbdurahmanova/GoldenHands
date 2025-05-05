@@ -18,8 +18,9 @@ public interface CategoryService {
 
     List<CategoryDto> getSubcategories(Integer parentId);
 
-//    List<ProductDto> getCategoriesWithProducts(P)
-
     Integer getCountOfProductsInCategory(Integer id);
+
+    //List<ProductDto> getCountOfSubCategories
+
 
 }
