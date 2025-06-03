@@ -12,20 +12,11 @@ import java.util.List;
 @Mapper(componentModel="spring")
 public interface CategoryMapper {
 
-
-    @Mapping(source = "parentCategory.id", target = "parentCategoryId")
     List<CategoryDto> toCategoryDtoList(List<Category> category);
 
-    @Mapping(source = "parentCategory.id", target = "parentCategoryId")
     CategoryDto toCategoryDtoGetById(Category category);
 
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "parentCategory", ignore = true)
-    @Mapping(target = "subCategories", ignore = true)
-    @Mapping(target = "products", ignore = true)
     Category toCategoryAdd(CreateCategoryRequest createCategoryRequest);
 
-    @Mapping(target = "id", ignore = true)
-    void updateCustomerFromDto(CreateCategoryRequest request, @MappingTarget Category category);
+    void updateCategoryFromDto(CreateCategoryRequest request, @MappingTarget Category category);
 }

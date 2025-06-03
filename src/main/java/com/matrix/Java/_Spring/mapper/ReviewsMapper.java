@@ -16,4 +16,6 @@ public interface ReviewsMapper {
     ReviewsDto toReviewsDtoGetById(Reviews reviews);
 
     Reviews toCreateReviewsRequest(CreateReviewsRequest createReviewsRequest);
+
+    Reviews updateCreateReviewsRequest(CreateReviewsRequest createReviewsRequest, ReviewsMapper reviewsMapper);
 }

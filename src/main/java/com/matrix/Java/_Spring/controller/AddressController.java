@@ -2,15 +2,12 @@ package com.matrix.Java._Spring.controller;
 
 
 import com.matrix.Java._Spring.dto.AddressDto;
-import com.matrix.Java._Spring.exceptions.DataNotFoundException;
-import com.matrix.Java._Spring.model.entity.Address;
-import com.matrix.Java._Spring.model.entity.Customer;
+import com.matrix.Java._Spring.dto.CreateAddressRequest;
 import com.matrix.Java._Spring.service.AddressService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,21 +18,31 @@ public class AddressController {
 
     private final AddressService addressService;
 
-
-    @GetMapping("/List")
+    @GetMapping()
     public List<AddressDto> getList() {
        return addressService.getList();
     }
 
-    @GetMapping("/ById/{id}")
+    @GetMapping("/{id}")
     public AddressDto getById(@PathVariable Integer id) {
        return addressService.getById(id);
     }
 
-
-    @GetMapping("ByCustomerId/{customerId}")
+    @GetMapping("customer/{customerId}")
     public AddressDto getByCustomerId(@PathVariable Integer customerId) {
         return addressService.getByCustomerId(customerId);
+    }
+
+    @PostMapping()
+    public AddressDto create(@RequestBody @Valid CreateAddressRequest createAddressRequest,
+                             HttpServletRequest request) {
+        return addressService.create(createAddressRequest,request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id,
+                       HttpServletRequest request) {
+        addressService.delete(id,request);
     }
 
 }

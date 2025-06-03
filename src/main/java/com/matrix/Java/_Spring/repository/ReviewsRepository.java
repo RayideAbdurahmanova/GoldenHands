@@ -9,5 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ReviewsRepository extends JpaRepository<Reviews,Integer> {
+
     List<Reviews> findByProduct(Product product);
 }

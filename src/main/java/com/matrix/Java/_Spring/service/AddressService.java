@@ -1,10 +1,8 @@
 package com.matrix.Java._Spring.service;
 
 import com.matrix.Java._Spring.dto.AddressDto;
-import com.matrix.Java._Spring.dto.CategoryDto;
 import com.matrix.Java._Spring.dto.CreateAddressRequest;
-import com.matrix.Java._Spring.dto.CreateCategoryRequest;
-import com.matrix.Java._Spring.mapper.AddressMapper;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -16,9 +14,9 @@ public interface AddressService {
 
     AddressDto getByCustomerId(Integer customerId);
 
-    AddressDto create(CreateAddressRequest createAddressRequest);
+    AddressDto create(CreateAddressRequest createAddressRequest, HttpServletRequest request);
 
-    AddressDto update(Integer id, CreateAddressRequest createAddressRequest);
+    AddressDto update(Integer id, CreateAddressRequest createAddressRequest,HttpServletRequest request);
 
-    void delete(Integer id);
+    void delete(Integer id,HttpServletRequest request);
 }

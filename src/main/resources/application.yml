@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: e-commerce
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/golden_hands
+    username: root
+    password: java123
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: abduraxmanovarahide@gmail.com
+    password: nakh awsb etko hhlg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8081
+
+secret:
+  key: 4d6b7e9f2a3c8b1d5e7f9a0c2b4d6e8f1a3c5e7f9b0d2f4a6c8e0b1d3f5a7c9
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /v3/api-docs

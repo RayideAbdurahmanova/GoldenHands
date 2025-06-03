@@ -1,69 +1,57 @@
 package com.matrix.Java._Spring.service.impl;
 
-import com.matrix.Java._Spring.dto.CategoryDto;
-import com.matrix.Java._Spring.dto.CreateCustomerRequest;
 import com.matrix.Java._Spring.dto.CustomerDto;
-import com.matrix.Java._Spring.exceptions.DataNotFoundException;
+import com.matrix.Java._Spring.dto.UserProfile;
 import com.matrix.Java._Spring.mapper.CustomerMapper;
-import com.matrix.Java._Spring.model.entity.Customer;
-import com.matrix.Java._Spring.repository.CustomerRepository;
+import com.matrix.Java._Spring.model.entity.User;
+import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerServiceImpl implements CustomerService {
 
-    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
     private final CustomerMapper customerMapper;
 
+
     @Override
-    public List<CustomerDto> getList() {
-        return customerMapper.getCustomerDtoList(customerRepository.findAll());
+    public UserProfile getMyProfile() {
+        log.info("Start retrieval of user profile");
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("email: {}", email);
+        var userEntity = userRepository.findByUsername(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Data not found"));
+        log.info("userEntity: {}", userEntity);
+        UserProfile userProfile=customerMapper.mapToUserProfile(userEntity);
+        log.info("Finished retrieval {} user profile successfully", userProfile);
+        return userProfile;
     }
 
     @Override
-    public CustomerDto getById(Integer id) {
-        return customerMapper.toCustomerDtoGetById(customerRepository.findById(id).orElseThrow(
-                ()->new DataNotFoundException("Data Not Found With ID:"+id+" CustomerID")
-        ));
-    }
+    public List<CustomerDto> getAll() {
+        log.info("Start retrieval of all customers");
+        List<User> userEntities = userRepository.findAll();
+        List<CustomerDto> customerDtoList = customerMapper.mapToDtoList(userEntities);
 
-    @Override
-    public CustomerDto create(CreateCustomerRequest createCustomerRequest) {
-        Customer customer=customerMapper.toCreateCustomerRequest(createCustomerRequest);
-        Customer savedCustomer=customerRepository.save(customer);
-        return customerMapper.toCustomerDtoGetById(savedCustomer);
-    }
+//        for (int i = 0; i < userEntities.size(); i++) {
+//            String phoneNumber = userEntities.get(i).getCustomer() != null
+//                    ? userEntities.get(i).getCustomer().getPhoneNumber()
+//                    : null;
+//            customerDtoList.get(i).setPhoneNumber(phoneNumber);
+//        }
 
-
-
-
-    @Override
-    public CustomerDto update(Integer id, CreateCustomerRequest createCustomerRequest) {
-        Customer customer=customerRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("Customer with ID " + id + " not found"));
-
-        customerMapper.updateCustomerFromDto(createCustomerRequest,customer);
-
-        Customer updatedCustomer = customerRepository.save(customer);
-        return customerMapper.toCustomerDtoGetById(updatedCustomer);
-
-
-
-    }
-
-    @Override
-    public void delete(Integer id) {
-
-        Customer customer=customerRepository.findById(id).orElseThrow(
-                ()->new RuntimeException("Customer with ID " + id + " not found"));
-
-        customerRepository.deleteById(id);
+        log.info("Retrieved {} users with phone numbers", customerDtoList.size());
+        log.info("Retrieved {} customers", customerDtoList.size());
+        log.info("Finished retrieval {} customers", customerDtoList.size());
+        return customerDtoList;
     }
 }

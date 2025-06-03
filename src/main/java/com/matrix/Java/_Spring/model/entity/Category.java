@@ -7,16 +7,16 @@ import lombok.Data;
 import java.util.List;
 
 @Entity
-@Table(name="categories")
+@Table(name = "categories")
 @Data
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column(name = "id")
     private Integer id;
 
-    @Column(nullable = false,name="category_name")
+    @Column(nullable = false, name = "category_name")
     private String categoryName;
 
     @ManyToOne
@@ -27,8 +27,4 @@ public class Category {
 
     @OneToMany(mappedBy = "parentCategory")
     private List<Category> subCategories;
-
-    @OneToMany(mappedBy = "category")
-    private List<Product> products;
-
 }

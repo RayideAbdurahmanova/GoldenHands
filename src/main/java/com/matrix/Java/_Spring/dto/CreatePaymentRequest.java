@@ -8,10 +8,7 @@ import lombok.Data;
 public class CreatePaymentRequest {
 
     private double amount;
-
     private Long orderId;
-
     private PaymentMethods paymentMethod;
-
-//    private PaymentStatus paymentStatus; //default olacaq
+    private PaymentStatus paymentStatus;
 }

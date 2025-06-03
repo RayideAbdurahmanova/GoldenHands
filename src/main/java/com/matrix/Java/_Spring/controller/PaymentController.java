@@ -3,10 +3,8 @@ package com.matrix.Java._Spring.controller;
 
 import com.matrix.Java._Spring.dto.CreatePaymentRequest;
 import com.matrix.Java._Spring.dto.PaymentDto;
-import com.matrix.Java._Spring.exceptions.DataNotFoundException;
-import com.matrix.Java._Spring.model.entity.Order;
-import com.matrix.Java._Spring.model.entity.Payment;
 import com.matrix.Java._Spring.service.PaymentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,18 +19,18 @@ public class PaymentController {
     private final PaymentService paymentService;
 
 
-    @GetMapping("/ByCustomerId/{customerId}")
+    @GetMapping("/customer/{customerId}")
     public List<PaymentDto> getListByCustomerId(@PathVariable Integer customerId) {
         return paymentService.getListByCustomerId(customerId);
     }
 
 
-    @GetMapping("/ByPaymentId/{id}")
+    @GetMapping("/{id}")
     public PaymentDto getById(@PathVariable Integer id) {
         return  paymentService.getById(id);
     }
 
-    @GetMapping("ByOrderId/{orderId}")
+    @GetMapping("/order/{orderId}")
     public PaymentDto getByOrderId(@PathVariable Long orderId) {
         return paymentService.getByOrderId(orderId);
     }
@@ -40,21 +38,23 @@ public class PaymentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PaymentDto create(@RequestBody CreatePaymentRequest createPaymentRequest) {
-        return paymentService.create(createPaymentRequest);
+    public PaymentDto create(@RequestBody CreatePaymentRequest createPaymentRequest, HttpServletRequest request) {
+        return paymentService.create(createPaymentRequest,request);
     }
 
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public PaymentDto update(@PathVariable Integer id,
-                             @RequestBody CreatePaymentRequest createPaymentRequest) {
-       return paymentService.update(id,createPaymentRequest);
+                             @RequestBody CreatePaymentRequest createPaymentRequest,
+                             HttpServletRequest request) {
+       return paymentService.update(id,createPaymentRequest,request);
     }
 
 
-    @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable Integer id) {
-        paymentService.delete(id);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id,
+                       HttpServletRequest request) {
+        paymentService.delete(id,request);
     }
 
 }
