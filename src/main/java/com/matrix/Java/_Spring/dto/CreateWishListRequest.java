@@ -5,7 +5,5 @@ import lombok.Data;
 @Data
 public class CreateWishListRequest {
 
-
     private Long productId;
-
 }

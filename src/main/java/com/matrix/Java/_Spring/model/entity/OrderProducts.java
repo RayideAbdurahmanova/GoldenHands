@@ -6,28 +6,27 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="order_products")
+@Table(name = "order_products")
 @Data
 public class OrderProducts {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column(name = "id")
     private Integer orderProductId;
-
-    @ManyToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
-    private Order order;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private Product product;
 
     @Column(nullable = false)
     private Integer quantity;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+
+    @ManyToOne()
+    @JoinColumn(name = "product_id")
+    private Product product;
+
     @Column(nullable = false)
     private BigDecimal price;
-
 
 }

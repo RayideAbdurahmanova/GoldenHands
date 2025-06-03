@@ -7,23 +7,20 @@ import lombok.Data;
 @Table(name = "addresses")
 @Data
 public class Address {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String country;
     private String city;
     private String street;
     private String zipCode;
-    private String state;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id") // adjust name if needed
+    @OneToOne(mappedBy = "address")
+    private User user;
+
+    @OneToOne(mappedBy = "addressEntity")
     private Customer customer;
 
-
-
-
-
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 }

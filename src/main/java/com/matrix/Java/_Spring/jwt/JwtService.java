@@ -1,13 +1,16 @@
 package com.matrix.Java._Spring.jwt;
 
-import com.matrix.Java._Spring.model.entity.security.User;
-import io.jsonwebtoken.Claims;
+import com.matrix.Java._Spring.model.entity.User;
 
 public interface JwtService {
 
     String issueToken(User user);
 
-    Claims verifyToken(String Token);
+    void expired(String Token);
 
+    String extractUserName(String token);
 
+    void validateToken(String token);
+
+    Integer extractUserId(String token);
 }

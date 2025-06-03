@@ -2,6 +2,7 @@ package com.matrix.Java._Spring.mapper;
 
 import com.matrix.Java._Spring.dto.CreateWishListRequest;
 import com.matrix.Java._Spring.dto.WishListDto;
+import com.matrix.Java._Spring.model.entity.Reviews;
 import com.matrix.Java._Spring.model.entity.WishList;
 import org.mapstruct.Mapper;
 
@@ -15,4 +16,6 @@ public interface WishListMapper {
     WishListDto toWishListDtoGetById(WishList wishLists);
 
     WishList toCreateWishListRequest(CreateWishListRequest createWishListRequest);
+
+    WishList updateWishListFromRequest(CreateWishListRequest createWishListRequest, WishList wishList);
 }

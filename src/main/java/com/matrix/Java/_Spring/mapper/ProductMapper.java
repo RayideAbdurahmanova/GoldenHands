@@ -4,6 +4,7 @@ import com.matrix.Java._Spring.dto.CreateProductRequest;
 import com.matrix.Java._Spring.dto.ProductDto;
 import com.matrix.Java._Spring.model.entity.Product;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -15,4 +16,6 @@ public interface ProductMapper {
     ProductDto toProductDtoGetById(Product product);
 
     Product toCreateProductRequest(CreateProductRequest createProductRequest);
+
+    void updateProductFromRequest(CreateProductRequest createProductRequest, @MappingTarget Product product);
 }

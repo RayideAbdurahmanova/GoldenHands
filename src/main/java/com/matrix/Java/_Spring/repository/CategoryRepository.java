@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category,Integer> {
+    Boolean existsByCategoryName(String name);
 
     List<Category> findByParentCategory(Category parentCategory);
 }

@@ -5,12 +5,7 @@ import lombok.Data;
 
 @Data
 public class CreateOrderProductRequest {
-
-//    private Long orderId; //ozu gelecek
-
-    private Long productId;
-
+    private Integer orderId;
+    private Integer productId;
     private Integer quantity;
-
- //   private double price; productId ile gelecek
 }

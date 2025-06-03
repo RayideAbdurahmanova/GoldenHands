@@ -10,18 +10,9 @@ import java.util.List;
 public class OrderDto {
 
     private Long customerId;
-
     private OrderStatus orderStatus;
-
     private List<OrderProductDto> orderProducts;
-
     private BigDecimal totalAmount;
-
     private PaymentStatus paymentStatus;
-
     private AddressDto shippingAddress;
-
-
-
-
 }

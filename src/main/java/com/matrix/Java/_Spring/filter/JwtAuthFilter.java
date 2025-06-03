@@ -1,34 +1,47 @@
 package com.matrix.Java._Spring.filter;
 
-import com.matrix.Java._Spring.jwt.AuthService;
+import com.matrix.Java._Spring.jwt.JwtService;
+import com.matrix.Java._Spring.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    private final List<AuthService> authServices;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Optional<Authentication> authenticationOptional=Optional.empty();
-        for(AuthService authService: authServices){
-            authenticationOptional=authenticationOptional.or(()->authService.getAuthentication(request));
-        }
-        authenticationOptional.ifPresent(auth-> SecurityContextHolder.getContext().setAuthentication(auth));
-        filterChain.doFilter(request,response);
+        final String token;
 
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, "Bearer ")) {
+            doFilter(request, response, filterChain);
+            return;
+        }
+        token = authHeader.substring(7).trim();
+        jwtService.validateToken(token);
+        var email = jwtService.extractUserName(token);
+        if (StringUtils.isNotEmpty(email)) {
+            var user = userRepository.findByUsername(email).orElseThrow();
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(user, token, user.getAuthorities())
+            );
+        }
+        doFilter(request, response, filterChain);
     }
 }
