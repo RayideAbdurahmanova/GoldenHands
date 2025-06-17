@@ -5,6 +5,7 @@ import com.matrix.Java._Spring.dto.CreateOrderProductRequest;
 import com.matrix.Java._Spring.dto.OrderProductDto;
 import com.matrix.Java._Spring.service.OrderProductService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,7 @@ public class OrderProductController {
 
     private final OrderProductService orderProductService;
 
-    @GetMapping("/orderProducts-withOrderId/{orderId}")
+    @GetMapping("/details/{orderId}")
     public List<OrderProductDto> getOrderProductListWithOrderId(@PathVariable Integer orderId,
                                                                 HttpServletRequest request) {
         return orderProductService.getWithOrderId(orderId, request);
@@ -35,7 +36,7 @@ public class OrderProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderProductDto create(@RequestBody CreateOrderProductRequest createOrderProductRequest, HttpServletRequest request) {
+    public OrderProductDto create(@Valid @RequestBody CreateOrderProductRequest createOrderProductRequest, HttpServletRequest request) {
         return orderProductService.create(createOrderProductRequest, request);
     }
 
@@ -53,6 +54,4 @@ public class OrderProductController {
                        HttpServletRequest request) {
         orderProductService.delete(orderId, orderProductId, request);
     }
-
-
 }

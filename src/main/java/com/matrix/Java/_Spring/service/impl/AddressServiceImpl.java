@@ -14,10 +14,11 @@ import com.matrix.Java._Spring.repository.CustomerRepository;
 import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -48,80 +49,82 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Address not found"));
         AddressDto addressDto = addressMapper.toAddressDtoGetById(address);
-        log.info("Finished retrieval {} address successfully", addressDto);
+        log.info("Finished retrieval {} with address ID successfully", addressDto);
         return addressDto;
     }
 
     @Override
-    public AddressDto getByCustomerId(Integer customerId) {
-        log.info("Starting retrieval of customer with id {}", customerId);
-        Customer customer = customerRepository.findById(customerId)
+    public AddressDto getByCustomerId() {
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var user = userRepository.findByUsername(email).orElseThrow(
+                () -> new AccessDeniedException("User not found")
+        );
+
+        log.info("Starting retrieval of customer with id {}", user.getCustomer().getCustomerId());
+        Customer customer = customerRepository.findById(user.getCustomer().getCustomerId())
                 .orElseThrow(() -> new DataNotFoundException("Address not found"));
         Address address = addressRepository.findByCustomer(customer);
         if (address == null) {
             throw new DataNotFoundException("Address not found");
         }
         AddressDto addressDto = addressMapper.toAddressDtoGetById(address);
-        log.info("Finished retrieval {} address with ID: {} successfully", addressDto);
+        log.info("Finished retrieval {} address with Customer ID successfully", addressDto);
         return addressDto;
     }
 
     @Override
-    public AddressDto create(CreateAddressRequest createAddressRequest, HttpServletRequest request) {
+    public void create(CreateAddressRequest createAddressRequest, HttpServletRequest request) {
         log.info("Starting creating of address : {}", createAddressRequest);
         var token = request.getHeader("Authorization").substring(7).trim();
         var userId = jwtService.extractUserId(token);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("User with ID " + userId + " not found"));
-        Address address = addressMapper.toCreateAddressRequest(createAddressRequest);
-        address.setUser(user);
-        Address saved = addressRepository.save(address);
-        AddressDto addressDto = addressMapper.toAddressDtoGetById(saved);
-        log.info("Finished creation of address with id: {}", saved.getId());
-        return addressDto;
-    }
-
-    @Override
-    @Transactional
-    public AddressDto update(Integer id, CreateAddressRequest createAddressRequest, HttpServletRequest request) {
-        log.info("Starting  update of address with ID: {} ", id);
-        var token = request.getHeader("Authorization").substring(7).trim();
-        var userId = jwtService.extractUserId(token);
-        Customer customer = customerRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundException("Customer with ID " + userId + " not found"));
-
-        Address existing = addressRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Address not found"));
-
-        if (!existing.getCustomer().getCustomerId().equals(userId)) {
-            throw new AccessDeniedException("Address does not belong to customer with ID " + userId);
+        Address existingAddress = user.getAddress();
+        Address saved;
+        if (existingAddress == null) {
+            log.info("No existing address found for user ID: {}", userId);
+            Address address = addressMapper.toCreateAddressRequest(createAddressRequest);
+            address.setUser(user);
+            address.setCustomer(user.getCustomer());
+            var customer = user.getCustomer();
+            customer.setAddressEntity(address);
+            user.setAddress(address);
+            saved = addressRepository.save(address);
+        } else {
+            log.info("Existing address found for user ID: {}", userId);
+            addressMapper.updateAddressFromRequest(createAddressRequest, existingAddress);
+            saved = addressRepository.save(existingAddress);
+            log.info("Updating existing address : {}", saved);
         }
-
-        addressMapper.updateAddressFromDto(createAddressRequest, existing);
-        Address update = addressRepository.save(existing);
-        log.info("Updated address with ID {} for customer ID {}", id, userId);
-        AddressDto addressDto = addressMapper.toAddressDtoGetById(update);
-        log.info("Finished update of address with ID {} successfully", existing.getId());
-        return addressDto;
+        log.info("Finishing creating of address with ID : {}", saved.getId());
 
     }
 
+
     @Override
     @Transactional
-    public void delete(Integer id, HttpServletRequest request) {
-        log.info("Starting  deletion of address with ID : {} ", id);
+    public void delete(HttpServletRequest request) {
         var token = request.getHeader("Authorization").substring(7).trim();
         var userId = jwtService.extractUserId(token);
-        Customer customer = customerRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundException("Customer with ID " + userId + " not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("User with ID " + userId + " not found"));
+        Address address = user.getAddress();
 
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Address not found"));
-
-        if (!address.getCustomer().getCustomerId().equals(userId)) {
-            throw new AccessDeniedException("Address does not belong to customer with ID " + userId);
+        if (address == null) {
+            throw new DataNotFoundException("Address not found");
         }
-        addressRepository.deleteById(id);
-        log.info("Finished deletion of product with id: {}", id);
+        log.info("Attempting to delete address with ID: {}", address.getId());
+        user.setAddress(null);
+
+        if(address.getCustomer() != null) {
+            address.getCustomer().setAddressEntity(null);
+            customerRepository.save(address.getCustomer());
+            log.info("Cleared Customer.addressEntity for customer ID: {}", address.getCustomer().getCustomerId());
+        }
+        if(address.getSeller() != null) {
+            address.setSeller(null);
+            addressRepository.save(address);
+        }
+
     }
 }

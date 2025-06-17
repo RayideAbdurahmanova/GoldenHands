@@ -8,13 +8,11 @@ import java.util.List;
 
 public interface WishListService {
 
-    List<WishListDto> getListByCustomerId(Integer customerId);
-
-//    WishListDto getById(Integer id);
+    List<WishListDto> getListByUserId();
 
     WishListDto create(CreateWishListRequest createWishListRequest, HttpServletRequest request);
 
-    WishListDto update(Integer id, CreateWishListRequest createWishListRequest,HttpServletRequest request);
+    void delete(HttpServletRequest request);
 
-    void delete(Integer id,HttpServletRequest request);
+    void removeProduct(Integer productId,HttpServletRequest request);
 }

@@ -12,11 +12,9 @@ public interface AddressService {
 
     AddressDto getById(Integer id);
 
-    AddressDto getByCustomerId(Integer customerId);
+    AddressDto getByCustomerId();
 
-    AddressDto create(CreateAddressRequest createAddressRequest, HttpServletRequest request);
+    void create(CreateAddressRequest createAddressRequest, HttpServletRequest request);
 
-    AddressDto update(Integer id, CreateAddressRequest createAddressRequest,HttpServletRequest request);
-
-    void delete(Integer id,HttpServletRequest request);
+    void delete(HttpServletRequest request);
 }

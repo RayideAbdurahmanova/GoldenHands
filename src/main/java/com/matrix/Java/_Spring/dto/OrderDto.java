@@ -8,8 +8,8 @@ import java.util.List;
 
 @Data
 public class OrderDto {
-
     private Long customerId;
+    private Integer orderId;
     private OrderStatus orderStatus;
     private List<OrderProductDto> orderProducts;
     private BigDecimal totalAmount;

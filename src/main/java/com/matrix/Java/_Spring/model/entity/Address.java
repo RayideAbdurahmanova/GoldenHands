@@ -1,6 +1,7 @@
 package com.matrix.Java._Spring.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Data;
 
 @Entity
@@ -9,7 +10,7 @@ import lombok.Data;
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String city;
     private String street;
     private String zipCode;
@@ -17,7 +18,7 @@ public class Address {
     @OneToOne(mappedBy = "address")
     private User user;
 
-    @OneToOne(mappedBy = "addressEntity")
+    @OneToOne(mappedBy = "addressEntity", cascade = CascadeType.ALL)
     private Customer customer;
 
     @ManyToOne

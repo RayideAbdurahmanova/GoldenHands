@@ -11,11 +11,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
@@ -51,7 +49,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     @JoinColumn(name = "address_id")
     private Address address;
 
@@ -61,8 +59,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Reviews> reviews;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Balance balance;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

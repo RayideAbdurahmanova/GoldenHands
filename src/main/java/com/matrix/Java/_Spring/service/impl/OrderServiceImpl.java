@@ -3,58 +3,55 @@ package com.matrix.Java._Spring.service.impl;
 import com.matrix.Java._Spring.dto.CreateOrderRequest;
 import com.matrix.Java._Spring.dto.OrderDto;
 import com.matrix.Java._Spring.enums.OrderStatus;
-import com.matrix.Java._Spring.enums.PaymentMethods;
-import com.matrix.Java._Spring.enums.PaymentStatus;
 import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.JwtService;
-import com.matrix.Java._Spring.mapper.AddressMapper;
 import com.matrix.Java._Spring.mapper.OrderMapper;
 import com.matrix.Java._Spring.mapper.OrderProductMapper;
 import com.matrix.Java._Spring.model.entity.*;
 import com.matrix.Java._Spring.repository.*;
+import com.matrix.Java._Spring.service.AddressService;
 import com.matrix.Java._Spring.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 import static com.matrix.Java._Spring.enums.OrderStatus.PENDING;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class
-OrderServiceImpl implements OrderService {
+public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final CustomerRepository customerRepository;
-    private final AddressRepository addressRepository;
     private final ProductRepository productRepository;
     private final OrderProductRepository orderProductRepository;
-    private final AddressMapper addressMapper;
     private final OrderProductMapper orderProductMapper;
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final PaymentRepository paymentRepository;
+    private final AddressService addressService;
 
 
     @Override
-    public List<OrderDto> getListByCustomerId(Integer customerId) {
-        log.info("Starting retrieval of order list with ID: {}", customerId);
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new DataNotFoundException("Data Not Found With ID:" + customerId + " OrderID"));
+    public List<OrderDto> getListByCustomerId() {
+        var email= SecurityContextHolder.getContext().getAuthentication().getName();
+        var user=userRepository.findByUsername(email)
+                        .orElseThrow();
+        log.info("Starting retrieval of order list with ID: {}", user.getCustomer().getCustomerId());
+        Customer customer = customerRepository.findById(user.getCustomer().getCustomerId())
+                .orElseThrow(() -> new DataNotFoundException("Data Not Found With ID:" + user.getCustomer().getCustomerId() + " OrderID"));
 
         List<Order> orders = orderRepository.findAllByCustomer(customer);
         List<OrderDto> orderDtos = orderMapper.toOrderDtoList(orders);
-        log.info("Finished retrieval {} orders with ID: {}", orderDtos.size(), customerId);
+        log.info("Finished retrieval {} orders with ID: {}", orderDtos.size(), user.getCustomer().getCustomerId());
         return orderDtos;
     }
 
@@ -70,6 +67,7 @@ OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional
     public OrderDto create(CreateOrderRequest createOrderRequest, HttpServletRequest request) {
         log.info("Starting creation of order : {}", createOrderRequest);
         var token = request.getHeader("Authorization").substring(7).trim();
@@ -80,8 +78,8 @@ OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new DataNotFoundException("Product with ID " + createOrderRequest.getProductId() + " not found"));
         var seller = product.getSeller();
 
-        Address address = saveShippingAddress(createOrderRequest);
-        Order order = createNewOrder(createOrderRequest, user, address, seller);
+        addressService.create(createOrderRequest.getCreateAddress(), request);
+        Order order = createNewOrder(createOrderRequest, user, seller);
         BigDecimal totalAmount = calculateTotalAmount(createOrderRequest, order);
 
         order.setTotalAmount(totalAmount);
@@ -99,29 +97,10 @@ OrderServiceImpl implements OrderService {
         return orderDto;
     }
 
-
-    private Address saveShippingAddress(CreateOrderRequest createOrderRequest) {
-        log.info("Starting saving shipping address : {}", createOrderRequest);
-        Address address = addressMapper.toAddress(createOrderRequest);
-        Address saved = addressRepository.save(address);
-        log.info("Finished saving of shipping address");
-        return saved;
-    }
-
-    private Order createNewOrder(CreateOrderRequest createOrderRequest, User user, Address address, Seller seller) {
+    private Order createNewOrder(CreateOrderRequest createOrderRequest, User user, Seller seller) {
         log.info("Starting creation of  new order : {}", createOrderRequest);
-        Order order = orderMapper.toOrder(createOrderRequest, user, address, seller);
+        Order order = orderMapper.toOrder(createOrderRequest, user, seller);
         order.setCustomer(user.getCustomer());
-
-        Payment payment = new Payment();
-        payment.setPaymentStatus(PaymentStatus.PENDING);
-        payment.setAmount(BigDecimal.ZERO);
-        payment.setCustomer(user.getCustomer());
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setPaymentMethod(PaymentMethods.Bank_Transfer);
-        payment.setOrder(order);
-        order.setPayment(payment);
-
         log.info("Created new order with ID: {} successfully", order.getOrderId());
         log.info("Finished creation of new order with id: {}", order.getOrderId());
         return order;
@@ -196,22 +175,20 @@ OrderServiceImpl implements OrderService {
         return orderDto;
     }
 
-    @Override
-    public void delete(Integer id, HttpServletRequest request) {
-        log.info("Starting deletion order : {}", id);
-        var token = request.getHeader("Authorization").substring(7).trim();
-        var userId = jwtService.extractUserId(token);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundException("User with id" + userId + " not found"));
-        Customer customer = user.getCustomer();
-        Order order = orderRepository.findById(id).
-                orElseThrow(() -> new DataNotFoundException("Order with ID " + id + " not found"));
-        if (!order.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
-            throw new DataNotFoundException("Customer ID " + userId + " not found");
-        }
 
-        orderRepository.deleteById(id);
-        log.info("Deleted order with ID {}", id);
-        log.info("Finished deletion of order  with ID {}", id);
+    @Override
+    public OrderDto getCustomerOrder(Integer id) {
+        var email= SecurityContextHolder.getContext().getAuthentication().getName();
+        var user=userRepository.findByUsername(email)
+                .orElseThrow();
+       var order= orderRepository.findByOrderIdAndCustomerCustomerId(id, user.getCustomer().getCustomerId())
+                .orElseThrow(() -> new DataNotFoundException("Order with ID " + id + " not found"));
+        return orderMapper.toOrderDtoGetById(order);
+    }
+
+    @Override
+    public List<OrderDto> getAll() {
+        List<Order> orders = orderRepository.findAll();
+        return orderMapper.toOrderDtoList(orders);
     }
 }

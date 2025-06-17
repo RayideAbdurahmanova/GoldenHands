@@ -4,7 +4,7 @@ import lombok.Data;
 
 
 @Data
-public class    CreateCustomerRequest {
+public class   CreateCustomerRequest {
 
     private String name;
     private String username;

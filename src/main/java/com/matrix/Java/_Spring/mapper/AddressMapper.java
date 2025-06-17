@@ -21,7 +21,7 @@ public interface AddressMapper {
 
     Address toCreateAddressRequest(CreateAddressRequest createAddressRequest);
 
-    Address updateAddressFromDto(CreateAddressRequest createAddressRequest, @MappingTarget Address address);
+    Address updateAddressFromRequest(CreateAddressRequest createAddressRequest, @MappingTarget Address address);
 
     Address toAddress(CreateOrderRequest createOrderRequest);
 

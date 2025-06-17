@@ -3,6 +3,9 @@ package com.matrix.Java._Spring.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.temporal.Temporal;
+
 @Entity
 @Table(name = "reviews")
 @Data
@@ -28,4 +31,15 @@ public class Reviews {
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private Seller seller;
+
+    private LocalDateTime createdAt;
+
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+
 }

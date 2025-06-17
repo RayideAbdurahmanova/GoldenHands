@@ -57,8 +57,5 @@ public class AuthController {
         return "Your password has been reset. Please login app";
     }
 
-    @PutMapping("change-password")
-    public void changePassword(@RequestBody  @Valid ChangePasswordRequest changePasswordRequest){
-        authService.changePassword(changePasswordRequest);
-    }
+
 }

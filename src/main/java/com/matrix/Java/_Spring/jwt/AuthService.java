@@ -19,6 +19,4 @@ public interface AuthService {
     void forgetPssword(String email);
 
     void resetPassword(String otp, ResetPasswordRequest request);
-
-    void changePassword(ChangePasswordRequest changePasswordRequest);
 }
