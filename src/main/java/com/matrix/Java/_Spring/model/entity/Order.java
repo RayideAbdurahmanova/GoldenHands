@@ -25,9 +25,6 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderProducts> orderProducts;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
 
     private BigDecimal totalAmount;
 
@@ -43,9 +40,7 @@ public class Order {
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "balance_id")
-    private Balance balance;
+
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

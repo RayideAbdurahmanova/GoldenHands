@@ -1,5 +1,6 @@
 package com.matrix.Java._Spring.service;
 
+import com.matrix.Java._Spring.dto.ChangePasswordRequest;
 import com.matrix.Java._Spring.dto.CustomerDto;
 import com.matrix.Java._Spring.dto.UserProfile;
 
@@ -9,4 +10,7 @@ public interface CustomerService {
     UserProfile getMyProfile();
 
     List<CustomerDto> getAll();
-}
+
+     void changePassword(ChangePasswordRequest changePasswordRequest);
+
+    }

@@ -44,4 +44,7 @@ public class GlobalExceptionHandler {
         var value = Objects.requireNonNull(e.getFieldError()).getDefaultMessage();
         return new ErrorResponse(value);
     }
+
+
+
 }

@@ -1,6 +1,9 @@
 package com.matrix.Java._Spring.jwt.impl;
 
-import com.matrix.Java._Spring.dto.*;
+import com.matrix.Java._Spring.dto.CustomerSignUp;
+import com.matrix.Java._Spring.dto.LoginRequest;
+import com.matrix.Java._Spring.dto.ResetPasswordRequest;
+import com.matrix.Java._Spring.dto.SellerSignUp;
 import com.matrix.Java._Spring.exceptions.DataExistException;
 import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.AuthService;
@@ -18,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -163,20 +165,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
     }
 
-    @Override
-    public void changePassword(ChangePasswordRequest changePasswordRequest) {
-        var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByUsername(email)
-                .orElseThrow(() -> new DataNotFoundException("User is not found"));
-        if (!changePasswordRequest.confirmPassword().equals(changePasswordRequest.password())) {
-            throw new DataNotFoundException("Passwords do not match");
-        }
-        if (!passwordEncoder.matches(changePasswordRequest.currentPassword(), user.getPassword())) {
-            throw new DataNotFoundException("Current password do not match");
-        }
-        user.setPassword(passwordEncoder.encode(changePasswordRequest.confirmPassword()));
-        userRepository.save(user);
-    }
+
 
 
     private Set<Role> createRole() {

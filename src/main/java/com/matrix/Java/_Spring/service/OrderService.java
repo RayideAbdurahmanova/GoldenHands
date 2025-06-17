@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    List<OrderDto> getListByCustomerId(Integer customerId);
+    List<OrderDto> getListByCustomerId();
 
     OrderDto getById(Integer id);
 
@@ -16,5 +16,8 @@ public interface OrderService {
 
     OrderDto update(Integer id, CreateOrderRequest createOrderRequest, HttpServletRequest request);
 
-    void delete(Integer id, HttpServletRequest request);
+
+    OrderDto getCustomerOrder(Integer id);
+
+    List<OrderDto> getAll();
 }

@@ -5,8 +5,10 @@ import com.matrix.Java._Spring.dto.OrderProductDto;
 import com.matrix.Java._Spring.exceptions.AccessDeniedException;
 import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.JwtService;
+import com.matrix.Java._Spring.mapper.OrderMapper;
 import com.matrix.Java._Spring.mapper.OrderProductMapper;
 
+import com.matrix.Java._Spring.mapper.ProductMapper;
 import com.matrix.Java._Spring.model.entity.Order;
 import com.matrix.Java._Spring.model.entity.OrderProducts;
 import com.matrix.Java._Spring.model.entity.Product;
@@ -21,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,6 +36,8 @@ public class OrderProductServiceImpl implements OrderProductService {
     private final OrderRepository orderRepository;
     private final JwtService jwtService;
     private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
+    private final ProductMapper productMapper;
 
 
     @Override
@@ -48,9 +51,19 @@ public class OrderProductServiceImpl implements OrderProductService {
             throw new AccessDeniedException("You do not have permission to access this resource");
         }
         List<OrderProducts> orderProducts = orderProductRepository.findByOrder(order);
-        List<OrderProductDto> orderProductDtos = orderProductMapper.getOrderProductDtoList(orderProducts);
+        List<OrderProductDto> orderProductDtoes = orderProductMapper.getOrderProductDtoList(orderProducts);
         log.info("Finished retrieval {} order products for order ID {}", orderProducts.size(), orderId);
-        return orderProductDtos;
+        var orderList = orderProducts.stream()
+                .map(OrderProducts::getOrder).toList();
+
+        var prdouctList = orderProducts.stream()
+                .map(OrderProducts::getProduct).toList();
+        var listOrderDto = orderMapper.toOrderDtoList(orderList);
+        var productDt = productMapper.getProductDtoList(prdouctList);
+
+        orderProductDtoes.forEach(orderProductDto -> orderProductDto.setOrders(listOrderDto));
+        orderProductDtoes.forEach(orderProductDto -> orderProductDto.setProducts(productDt));
+        return orderProductDtoes;
     }
 
 

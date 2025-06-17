@@ -3,8 +3,6 @@ package com.matrix.Java._Spring.controller;
 
 import com.matrix.Java._Spring.dto.CreateProductRequest;
 import com.matrix.Java._Spring.dto.ProductDto;
-import com.matrix.Java._Spring.jwt.JwtService;
-import com.matrix.Java._Spring.jwt.impl.JwtServiceImpl;
 import com.matrix.Java._Spring.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,8 +19,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-    private final JwtService jwtService;
-    private final JwtServiceImpl jwtServiceImpl;
 
     @GetMapping()
     public List<ProductDto> getList() {

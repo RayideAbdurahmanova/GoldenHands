@@ -10,9 +10,11 @@ public interface ReviewsService {
 
     List<ReviewsDto> getListByProductId(Integer productId);
 
+    List<ReviewsDto> getListByUserId();
+
     ReviewsDto create(CreateReviewsRequest createReviewsRequest, HttpServletRequest request);
 
     ReviewsDto update(Integer id, CreateReviewsRequest createReviewsRequest,HttpServletRequest request);
 
-    void delete(Integer productId,Integer id, HttpServletRequest request);
+    void delete(Integer productId, HttpServletRequest request);
 }

@@ -4,7 +4,7 @@ import com.matrix.Java._Spring.dto.CreateOrderRequest;
 import com.matrix.Java._Spring.dto.OrderDto;
 import com.matrix.Java._Spring.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,21 +19,35 @@ public class OrderController {
 
     private final OrderService orderService;
 
-
-    @GetMapping("/customer/{customerId}")
-    public List<OrderDto> getListByCustomerId(@PathVariable Integer customerId) {
-        return orderService.getListByCustomerId(customerId);
+    @GetMapping("/customer")
+    @PreAuthorize("hasAuthority('USER')")
+    public List<OrderDto> getListByCustomerId() {
+        return orderService.getListByCustomerId();
     }
 
+    @GetMapping("/customer-order/{id}")
+    @PreAuthorize("hasAuthority('USER')")
+    public OrderDto getCustomerOrder(@PathVariable Integer id) {
+        return orderService.getCustomerOrder(id);
+    }
+
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public OrderDto getById(@PathVariable Integer id) {
         return orderService.getById(id);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<OrderDto> getAll() {
+        return orderService.getAll();
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('USER')")
-    public OrderDto create(@RequestBody CreateOrderRequest createOrderRequest,
+    public OrderDto create(@Valid @RequestBody CreateOrderRequest createOrderRequest,
                            HttpServletRequest request) {
         return orderService.create(createOrderRequest,request);
     }
@@ -44,11 +58,5 @@ public class OrderController {
                            HttpServletRequest request) {
         return orderService.update(id, createOrderRequest, request);
     }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id,
-                       HttpServletRequest request) {
-        orderService.delete(id, request);
-        // have to look
-    }
+    //have to look
 }

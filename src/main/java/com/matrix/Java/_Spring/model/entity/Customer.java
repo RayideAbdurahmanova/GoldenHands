@@ -14,7 +14,7 @@ public class Customer {
     @Column(name = "id")
     private Integer customerId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address addressEntity;
 
