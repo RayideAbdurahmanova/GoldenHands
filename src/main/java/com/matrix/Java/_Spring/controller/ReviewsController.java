@@ -23,13 +23,14 @@ public class ReviewsController {
 
     @GetMapping("/product/{productId}")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN','SELLER')")
+    @ResponseStatus(HttpStatus.OK)
     public List<ReviewsDto> getListByProductId(@PathVariable Integer productId) {
         return reviewsService.getListByProductId(productId);
     }
 
-
     @GetMapping("/user")
     @PreAuthorize("hasAnyAuthority('USER')")
+    @ResponseStatus(HttpStatus.OK)
     public List<ReviewsDto> getListByUserId() {
         return reviewsService.getListByUserId();
     }
@@ -42,6 +43,7 @@ public class ReviewsController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER')")
     public ReviewsDto update(@PathVariable Integer id,
                              @RequestBody CreateReviewsRequest createReviewsRequest,
                              HttpServletRequest request) {
@@ -49,6 +51,8 @@ public class ReviewsController {
     }
 
     @DeleteMapping("/{productId}")
+    @PreAuthorize("hasAnyAuthority('USER','SELLER')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer productId,
                        HttpServletRequest request) {
         reviewsService.delete(productId, request);

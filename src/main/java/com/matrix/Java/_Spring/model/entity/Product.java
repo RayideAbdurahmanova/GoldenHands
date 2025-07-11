@@ -3,12 +3,14 @@ package com.matrix.Java._Spring.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
 @Entity
 @Table(name = "products")
 @Data
+@ToString(exclude = {"category", "seller", "orderProducts", "reviews"})
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +23,7 @@ public class Product {
     @Column(nullable = false)
     private double price;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -42,7 +44,4 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<Reviews> reviews;
-
-    @ManyToMany(mappedBy = "products")
-    private List<WishList> wishLists;
 }

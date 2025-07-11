@@ -3,9 +3,11 @@ package com.matrix.Java._Spring.service.impl;
 
 import com.matrix.Java._Spring.dto.CreateWishListRequest;
 import com.matrix.Java._Spring.dto.WishListDto;
+import com.matrix.Java._Spring.dto.WishListProduct;
 import com.matrix.Java._Spring.exceptions.DataExistException;
 import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.JwtService;
+import com.matrix.Java._Spring.mapper.ProductMapper;
 import com.matrix.Java._Spring.mapper.WishListMapper;
 import com.matrix.Java._Spring.model.entity.Product;
 import com.matrix.Java._Spring.model.entity.User;
@@ -16,15 +18,14 @@ import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.repository.WishListRepository;
 import com.matrix.Java._Spring.service.WishListService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -38,33 +39,27 @@ public class WishListServiceImpl implements WishListService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
     @Override
-    public List<WishListDto> getListByUserId() {
+    public WishListDto getListByUserId() {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = userRepository.findByUsername(email)
                 .orElseThrow();
 
-        List<WishList> wishLists = wishListRepository.findAllByUser(user);
-        if (wishLists.isEmpty()) {
-            log.info("No wishlists found for user ID: {}", user.getId());
-            return List.of();
-        }
-        WishList wishList = wishLists.get(0);
-        List<WishListDto> wishListDtos = wishList.getProducts() != null && !wishList.getProducts().isEmpty()
-                ? wishList.getProducts().stream()
+        var wishList = wishListRepository.findByUser(user)
+                .orElseThrow(() -> new DataNotFoundException("WishList Not Found"));
+        var wishlistDto = wishListMapper.toWishListDtoGetById(wishList);
+        var wishlistProduct = wishList.getProducts().stream()
                 .map(product -> {
-                    WishListDto wishListDto = new WishListDto();
-                    wishListDto.setId(wishList.getId());
-                    wishListDto.setUserId(user.getId());
-                    wishListDto.setProductId(product.getId());
-                    return wishListDto;
-                })
-                .collect(Collectors.toList())
-                : List.of();
-
-        log.info("Finished retrieval {} wish lists", wishListDtos.size());
-        return wishListDtos;
+                    WishListProduct wishListProduct = new WishListProduct();
+                    wishListProduct.setPrice(product.getPrice());
+                    wishListProduct.setProductName(product.getProductName());
+                    wishListProduct.setDescription(product.getDescription());
+                    return wishListProduct;
+                }).toList();
+        wishlistDto.setProducts(wishlistProduct);
+        return wishlistDto;
     }
 
 
@@ -88,7 +83,7 @@ public class WishListServiceImpl implements WishListService {
         Optional<WishList> existingWishList = wishListRepository.findByUser(user);
         if (existingWishList.isPresent()) {
             wishList = existingWishList.get();
-            if (wishList.getProducts().contains(product)) {
+            if (wishList.getProducts().stream().anyMatch(p -> p.getId().equals(product.getId()))) {
                 throw new DataExistException("Product with ID: " + product.getId() + " already exists");
             }
             wishList.getProducts().add(product);
@@ -104,20 +99,19 @@ public class WishListServiceImpl implements WishListService {
         WishListDto wishListDto = wishListMapper.toWishListDtoGetById(savedWishList);
         wishListDto.setId(wishList.getId());
         wishListDto.setUserId(wishList.getUser() != null ? wishList.getUser().getId() : null);
-        wishListDto.setProductId(product.getId());
         log.info("Finished creation of with list with id: {}", savedWishList.getId());
         return wishListDto;
     }
-    
+
 
     @Override
     public void delete(HttpServletRequest request) {
         var token = request.getHeader("Authorization").substring(7).trim();
         var userId = jwtService.extractUserId(token);
-        var user=userRepository.findById(userId)
+        var user = userRepository.findById(userId)
                 .orElseThrow();
         WishList wishList = wishListRepository.findByUser(user)
-                .orElseThrow(() -> new DataNotFoundException("Wishlist not found with user: " +  user));
+                .orElseThrow(() -> new DataNotFoundException("Wishlist not found with user: " + user));
 
         wishListRepository.delete(wishList);
         log.info("Deleted wishlist with ID {} for customer ID {}", wishList.getId(), userId);
@@ -128,8 +122,8 @@ public class WishListServiceImpl implements WishListService {
     public void removeProduct(Integer productId, HttpServletRequest request) {
         log.info("Starting removal of product ID: {} from wishlist", productId);
 
-        if (productId == null) {
-            throw new IllegalArgumentException("Product ID cannot be null");
+        if (productId == null || productId <= 0) {
+            throw new DataNotFoundException("Product ID cannot be null or negative");
         }
 
         var token = request.getHeader("Authorization").substring(7).trim();

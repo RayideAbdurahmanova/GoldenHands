@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface WishListService {
 
-    List<WishListDto> getListByUserId();
+    WishListDto getListByUserId();
 
     WishListDto create(CreateWishListRequest createWishListRequest, HttpServletRequest request);
 

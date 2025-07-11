@@ -14,9 +14,6 @@ public interface OrderService {
 
     OrderDto create(CreateOrderRequest createOrderRequest, HttpServletRequest request);
 
-    OrderDto update(Integer id, CreateOrderRequest createOrderRequest, HttpServletRequest request);
-
-
     OrderDto getCustomerOrder(Integer id);
 
     List<OrderDto> getAll();

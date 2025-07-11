@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "seller")
+@ToString(exclude = { "user"})
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,14 +25,14 @@ public class Seller {
     @OneToMany(mappedBy = "seller")
     List<Product> products;
 
-    @OneToMany(mappedBy = "seller")
-    List<Order> orders;
+//    @OneToMany(mappedBy = "seller")
+//    List<Order> orders;
 
-    @OneToMany(mappedBy = "seller")
-    List<Address> addresses;
+//    @OneToMany(mappedBy = "seller")
+//    List<Address> addresses;
 
-    @OneToMany(mappedBy = "seller")
-    List<Reviews> reviews;
+//    @OneToMany(mappedBy = "seller")
+//    List<Reviews> reviews;
 
     @OneToOne(mappedBy = "seller")
     private User user;

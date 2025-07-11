@@ -2,6 +2,7 @@ package com.matrix.Java._Spring.mapper;
 
 import com.matrix.Java._Spring.dto.CreateWishListRequest;
 import com.matrix.Java._Spring.dto.WishListDto;
+import com.matrix.Java._Spring.dto.WishListProduct;
 import com.matrix.Java._Spring.model.entity.Reviews;
 import com.matrix.Java._Spring.model.entity.WishList;
 import org.mapstruct.Mapper;
@@ -9,14 +10,11 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel="spring")
+@Mapper(componentModel = "spring")
 public interface WishListMapper {
 
-    List<WishListDto> getWishListDtoList(List<WishList> wishLists);
-
+    @Mapping(target = "userId", source = "user.id")
     WishListDto toWishListDtoGetById(WishList wishLists);
 
     WishList toCreateWishListRequest(CreateWishListRequest createWishListRequest);
-
-    WishList updateWishListFromRequest(CreateWishListRequest createWishListRequest, WishList wishList);
 }

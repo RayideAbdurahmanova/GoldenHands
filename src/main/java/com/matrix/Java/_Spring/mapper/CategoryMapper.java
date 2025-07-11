@@ -14,6 +14,7 @@ public interface CategoryMapper {
 
     List<CategoryDto> toCategoryDtoList(List<Category> category);
 
+    @Mapping(source = "parentCategory.id", target = "parentCategoryId")
     CategoryDto toCategoryDtoGetById(Category category);
 
     Category toCategoryAdd(CreateCategoryRequest createCategoryRequest);

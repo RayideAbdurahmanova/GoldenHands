@@ -16,5 +16,4 @@ public interface AddressService {
 
     void create(CreateAddressRequest createAddressRequest, HttpServletRequest request);
 
-    void delete(HttpServletRequest request);
 }

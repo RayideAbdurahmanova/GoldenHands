@@ -12,20 +12,23 @@ import java.util.List;
 public interface OrderMapper {
 
     @Mapping(target = "customerId", source = "customer.customerId")
+    @Mapping(target = "orderProducts", source = "orderProducts")
     List<OrderDto> toOrderDtoList(List<Order> orders);
+
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "orderId", source = "order.orderId")
+    OrderProductDto toOrderProductDto(OrderProducts orderProduct);
 
 
     @Mapping(target = "customerId", source = "customer.customerId")
     @Mapping(target = "shippingAddress", source = "address")
     OrderDto toOrderDtoGetById(Order order);
 
-    @Mapping(target = "orderProducts", ignore = true)
-    Order toOrderAdd(CreateOrderRequest createOrderRequest);
 
     @Mapping(target = "orderId", ignore = true)
     void updateOrderProductFromDto(CreateOrderRequest createOrderRequest, @MappingTarget Order order);
 
-    @Mapping(target = "customer", source = "user.customer")
-    @Mapping(target = "seller", source = "seller")
-    Order toOrder(CreateOrderRequest createOrderRequest, User user, Seller seller);
+    @Mapping(target = "customer", source = "basket.customer")
+//@Mapping(target = "totalAmount", source = "basket.totalPrice")
+    Order toOrder(CreateOrderRequest createOrderRequest, User user, Basket basket);
 }

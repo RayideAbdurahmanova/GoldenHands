@@ -14,8 +14,10 @@ public class CreateReviewsRequest {
     @Size(min = 10, max = 200, message = "Comment must be between 10 and 200 characters")
     private String comment;
     @NotNull
+    @Positive(message = "Product ID must be positive")
     private Integer productId;
     @NotNull
+    @Positive(message = "Order ID must be positive")
     private Integer orderId;
 
 }

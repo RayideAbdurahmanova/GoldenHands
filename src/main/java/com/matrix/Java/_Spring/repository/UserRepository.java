@@ -21,6 +21,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByOtp(String otp);
 
     Optional<User> findByAddress(Address address);
-
-
 }

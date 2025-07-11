@@ -1,12 +1,16 @@
 package com.matrix.Java._Spring.controller;
 
-import com.matrix.Java._Spring.dto.*;
+import com.matrix.Java._Spring.dto.CustomerSignUp;
+import com.matrix.Java._Spring.dto.LoginRequest;
+import com.matrix.Java._Spring.dto.ResetPasswordRequest;
+import com.matrix.Java._Spring.dto.SellerSignUp;
 import com.matrix.Java._Spring.jwt.AuthService;
 import com.matrix.Java._Spring.service.AuthResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -42,6 +46,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void sellerSignUp(@RequestBody @Valid SellerSignUp sellerSignUp) {
         authService.sellerSignUp(sellerSignUp);
+
     }
 
     @PostMapping("forget-password")
@@ -56,6 +61,4 @@ public class AuthController {
         authService.resetPassword(otp, request);
         return "Your password has been reset. Please login app";
     }
-
-
 }
