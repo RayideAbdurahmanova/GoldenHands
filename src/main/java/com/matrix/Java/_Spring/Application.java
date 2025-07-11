@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import java.util.Set;
 @SpringBootApplication
 @RequiredArgsConstructor
 @Slf4j
+@EnableFeignClients(basePackages = "com.matrix.Java._Spring.client")
 public class Application implements CommandLineRunner {
 
     private final BCryptPasswordEncoder passwordEncoder;

@@ -4,7 +4,6 @@ import com.matrix.Java._Spring.jwt.JwtService;
 import com.matrix.Java._Spring.model.entity.Role;
 
 import com.matrix.Java._Spring.model.entity.User;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;

@@ -39,9 +39,9 @@ public class ReviewServiceImpl implements ReviewsService {
     @Override
     public List<ReviewsDto> getListByProductId(Integer productId) {
         log.info("Starting retrieval list of reviews with ID: {}", productId);
-        if (productId == null) {
-            log.error("Product ID cannot be null");
-            throw new IllegalArgumentException("Product ID cannot be null");
+        if (productId == null || productId <= 0) {
+            log.error("Product ID cannot be null or negative");
+            throw new IllegalArgumentException("Product ID cannot be null or negative");
         }
 
         Product product = productRepository.findById(productId)
@@ -128,13 +128,9 @@ public class ReviewServiceImpl implements ReviewsService {
     @Override
     public ReviewsDto update(Integer id, CreateReviewsRequest createReviewsRequest, HttpServletRequest request) {
         log.info("Starting update of review ID: {}", id);
-        if (id == null) {
-            log.error("Review ID cannot be null");
-            throw new IllegalArgumentException("Review ID is required");
-        }
-        if (createReviewsRequest == null) {
-            log.error("Review request cannot be null");
-            throw new IllegalArgumentException("Review request is required");
+        if (id == null || id<=0) {
+            log.error("Review ID cannot be null or negative");
+            throw new IllegalArgumentException("Review ID is required positive number");
         }
         var token = request.getHeader("Authorization").substring(7).trim();
         var userId = jwtService.extractUserId(token);
@@ -157,19 +153,24 @@ public class ReviewServiceImpl implements ReviewsService {
                 log.warn("Attempted to update comment for review ID {} after 72 hours", id);
                 throw new IllegalStateException("Comment can only be updated within 72 hours of creation");
             }
+            reviews.setComment(createReviewsRequest.getComment());
+            reviews.setRating(createReviewsRequest.getRating());
         }
 
-        reviewsMapper.updateCreateReviewsRequest(createReviewsRequest, reviewsMapper);
 
         Reviews updated = reviewsRepository.save(reviews);
         log.info("Updated review with ID {} for product ID {} by customer ID {}", id, createReviewsRequest.getProductId(), userId);
         ReviewsDto reviewsDto = reviewsMapper.toReviewsDtoGetById(updated);
+        reviewsDto.setProductId(updated.getProduct().getId());
         log.info("Finished update of product with ID {} successfully", updated.getReviewId());
         return reviewsDto;
     }
 
     @Override
     public void delete(Integer productId, HttpServletRequest request) {
+        if(productId<=0){
+            throw new DataNotFoundException("ID must be positive");
+        }
         var token = request.getHeader("Authorization").substring(7).trim();
         var userId = jwtService.extractUserId(token);
         var review = reviewsRepository.findByUserIdAndProductId(userId, productId)

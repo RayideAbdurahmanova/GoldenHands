@@ -1,6 +1,7 @@
 package com.matrix.Java._Spring.model.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "roles")
+@ToString(exclude = { "users"})
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

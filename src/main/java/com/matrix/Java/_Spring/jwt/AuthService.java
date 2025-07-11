@@ -1,8 +1,10 @@
 package com.matrix.Java._Spring.jwt;
 
-import com.matrix.Java._Spring.dto.*;
+import com.matrix.Java._Spring.dto.CustomerSignUp;
+import com.matrix.Java._Spring.dto.LoginRequest;
+import com.matrix.Java._Spring.dto.ResetPasswordRequest;
+import com.matrix.Java._Spring.dto.SellerSignUp;
 import com.matrix.Java._Spring.service.AuthResponse;
-import jakarta.validation.Valid;
 
 public interface AuthService {
 

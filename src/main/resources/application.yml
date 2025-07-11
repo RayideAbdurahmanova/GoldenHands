@@ -19,13 +19,12 @@ spring:
           starttls:
             enable: true
 
-
-
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
 
 server:
   port: 8081

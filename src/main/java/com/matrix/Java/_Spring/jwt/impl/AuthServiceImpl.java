@@ -87,7 +87,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void sellerSignUp(SellerSignUp sellerSignUp) { //add
+    @Transactional
+    public void sellerSignUp(SellerSignUp sellerSignUp) {
         if (userRepository.existsByUsername(sellerSignUp.getEmail())) {
             throw new DataExistException("This email already exists");
         }

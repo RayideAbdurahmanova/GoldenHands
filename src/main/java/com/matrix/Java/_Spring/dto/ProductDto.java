@@ -6,8 +6,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ProductDto {
-
+public class    ProductDto {
+    private Integer id;
     private String productName;
     private double price;
     private Long categoryId;

@@ -4,9 +4,11 @@ package com.matrix.Java._Spring.controller;
 import com.matrix.Java._Spring.dto.SellerDto;
 import com.matrix.Java._Spring.service.SellerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class SellerController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
     public List<SellerDto> getSellers() {
         return sellerService.getSellers();
     }

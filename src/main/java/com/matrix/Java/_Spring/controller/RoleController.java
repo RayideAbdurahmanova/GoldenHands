@@ -7,6 +7,7 @@ import com.matrix.Java._Spring.model.entity.Role;
 import com.matrix.Java._Spring.service.RoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,21 +21,24 @@ public class RoleController {
     private final RoleService roleService;
 
     @PostMapping()
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void createRole(@RequestBody @Valid RoleRequest request) throws DataExistException {
         roleService.createRole(request);
     }
 
     @PostMapping("assing-role-toUser")
-    public void assingRoleToUser(@RequestParam Long userID,@RequestParam Long roleId) throws DataExistException {
-        roleService.assingRoleToUser(userID,roleId);
+    public void assignRoleToUser(@RequestParam Long userID,@RequestParam Long roleId) throws DataExistException {
+        roleService.assignRoleToUser(userID,roleId);
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<RoleDto> getRoles(){
         return roleService.getRoles();
     }
 
     @DeleteMapping("remove-role-fromUser")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeRoleFromUser(@RequestParam Long userID,@RequestParam Long roleID) throws DataExistException {
         roleService.removeRoleFromUser(userID,roleID);
     }

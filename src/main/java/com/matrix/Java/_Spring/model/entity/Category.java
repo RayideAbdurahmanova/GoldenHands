@@ -1,14 +1,17 @@
 package com.matrix.Java._Spring.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
 @Entity
 @Table(name = "categories")
 @Data
+@ToString(exclude = {"parentCategory"})
 public class Category {
 
     @Id
@@ -19,12 +22,11 @@ public class Category {
     @Column(nullable = false, name = "category_name")
     private String categoryName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_category_id")
-    @JsonBackReference
     private Category parentCategory;
-
 
     @OneToMany(mappedBy = "parentCategory")
     private List<Category> subCategories;
+
 }

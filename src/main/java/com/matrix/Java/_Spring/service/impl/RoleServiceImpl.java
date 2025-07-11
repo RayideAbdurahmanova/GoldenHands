@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,7 +43,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void assingRoleToUser(Long userID, Long roleId) {
+    public void assignRoleToUser(Long userID, Long roleId) {
         log.info("Starting assing role to user");
         var user = userRepository.findById(Math.toIntExact(userID))
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
@@ -63,12 +64,21 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public void removeRoleFromUser(Long userID, Long roleID) {
         log.info("Starting removing role from user");
-        User user = userRepository.findById(Math.toIntExact(userID)).orElseThrow();
-        Role role = roleRepository.findById(roleID).orElseThrow();
-        user.getRoles().remove(role);
-        userRepository.save(user);
+        User user = userRepository.findById(Math.toIntExact(userID)).orElseThrow(
+                ()->new DataNotFoundException("User not found with ID:"+ userID));
+        Role role = roleRepository.findById(roleID).orElseThrow(
+                ()->new DataNotFoundException("Role not found with ID:"+ roleID)
+        );
+        boolean removed = user.getRoles().remove(role);
+        if (removed) {
+            userRepository.save(user);
+            log.info("Successfully removed role {} from user {}", roleID, userID);
+        } else {
+            log.warn("Role {} was not associated with user {}", roleID, userID);
+        }
         log.info("Finishing removing role {} from user {}", roleID, userID);
     }
 }

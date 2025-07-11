@@ -2,12 +2,12 @@ package com.matrix.Java._Spring.service.impl;
 
 import com.matrix.Java._Spring.dto.SellerDto;
 import com.matrix.Java._Spring.mapper.SellerMapper;
+import com.matrix.Java._Spring.model.entity.Seller;
+import com.matrix.Java._Spring.model.entity.User;
 import com.matrix.Java._Spring.repository.SellerRepository;
 import com.matrix.Java._Spring.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

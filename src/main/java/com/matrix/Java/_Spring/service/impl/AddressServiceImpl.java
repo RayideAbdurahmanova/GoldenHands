@@ -11,6 +11,7 @@ import com.matrix.Java._Spring.model.entity.Customer;
 import com.matrix.Java._Spring.model.entity.User;
 import com.matrix.Java._Spring.repository.AddressRepository;
 import com.matrix.Java._Spring.repository.CustomerRepository;
+import com.matrix.Java._Spring.repository.SellerRepository;
 import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ public class AddressServiceImpl implements AddressService {
     private final CustomerRepository customerRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
 
 
     @Override
@@ -73,58 +75,35 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public void create(CreateAddressRequest createAddressRequest, HttpServletRequest request) {
         log.info("Starting creating of address : {}", createAddressRequest);
         var token = request.getHeader("Authorization").substring(7).trim();
         var userId = jwtService.extractUserId(token);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("User with ID " + userId + " not found"));
-        Address existingAddress = user.getAddress();
+
+        Customer customer = customerRepository.findById(user.getCustomer().getCustomerId())
+                .orElseThrow(() -> new DataNotFoundException("Customer not found"));
+        Address existingAddress = addressRepository.findByUserId(userId).orElse(null);
         Address saved;
         if (existingAddress == null) {
             log.info("No existing address found for user ID: {}", userId);
             Address address = addressMapper.toCreateAddressRequest(createAddressRequest);
             address.setUser(user);
-            address.setCustomer(user.getCustomer());
-            var customer = user.getCustomer();
-            customer.setAddressEntity(address);
+            address.setCustomer(customer);
             user.setAddress(address);
+            customer.setAddressEntity(address);
             saved = addressRepository.save(address);
+            userRepository.save(user);
+            customerRepository.save(customer);
         } else {
             log.info("Existing address found for user ID: {}", userId);
-            addressMapper.updateAddressFromRequest(createAddressRequest, existingAddress);
+            var address = addressMapper.updateAddressFromRequest(createAddressRequest, existingAddress);
+            customer.setAddressEntity(address);
             saved = addressRepository.save(existingAddress);
             log.info("Updating existing address : {}", saved);
         }
-        log.info("Finishing creating of address with ID : {}", saved.getId());
-
-    }
-
-
-    @Override
-    @Transactional
-    public void delete(HttpServletRequest request) {
-        var token = request.getHeader("Authorization").substring(7).trim();
-        var userId = jwtService.extractUserId(token);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundException("User with ID " + userId + " not found"));
-        Address address = user.getAddress();
-
-        if (address == null) {
-            throw new DataNotFoundException("Address not found");
-        }
-        log.info("Attempting to delete address with ID: {}", address.getId());
-        user.setAddress(null);
-
-        if(address.getCustomer() != null) {
-            address.getCustomer().setAddressEntity(null);
-            customerRepository.save(address.getCustomer());
-            log.info("Cleared Customer.addressEntity for customer ID: {}", address.getCustomer().getCustomerId());
-        }
-        if(address.getSeller() != null) {
-            address.setSeller(null);
-            addressRepository.save(address);
-        }
-
+//        log.info("Finishing creating of address with ID : {}", saved.getId());
     }
 }

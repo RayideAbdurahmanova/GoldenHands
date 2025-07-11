@@ -21,12 +21,14 @@ public class OrderController {
 
     @GetMapping("/customer")
     @PreAuthorize("hasAuthority('USER')")
+    @ResponseStatus(HttpStatus.OK)
     public List<OrderDto> getListByCustomerId() {
         return orderService.getListByCustomerId();
     }
 
     @GetMapping("/customer-order/{id}")
     @PreAuthorize("hasAuthority('USER')")
+    @ResponseStatus(HttpStatus.OK)
     public OrderDto getCustomerOrder(@PathVariable Integer id) {
         return orderService.getCustomerOrder(id);
     }
@@ -34,12 +36,14 @@ public class OrderController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
     public OrderDto getById(@PathVariable Integer id) {
         return orderService.getById(id);
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
     public List<OrderDto> getAll() {
         return orderService.getAll();
     }
@@ -49,14 +53,7 @@ public class OrderController {
     @PreAuthorize("hasAuthority('USER')")
     public OrderDto create(@Valid @RequestBody CreateOrderRequest createOrderRequest,
                            HttpServletRequest request) {
-        return orderService.create(createOrderRequest,request);
+        return orderService.create(createOrderRequest, request);
     }
 
-    @PutMapping("/{id}")
-    public OrderDto update(@PathVariable Integer id,
-                           @RequestBody CreateOrderRequest createOrderRequest,
-                           HttpServletRequest request) {
-        return orderService.update(id, createOrderRequest, request);
-    }
-    //have to look
 }

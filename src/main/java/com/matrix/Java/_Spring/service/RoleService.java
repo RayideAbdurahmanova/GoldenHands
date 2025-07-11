@@ -10,7 +10,7 @@ import java.util.List;
 public interface RoleService {
     void createRole(RoleRequest request) throws DataExistException;
 
-    void assingRoleToUser(Long userID, Long roleId);
+    void assignRoleToUser(Long userID, Long roleId);
 
     List<RoleDto> getRoles();
 

@@ -1,16 +1,17 @@
 package com.matrix.Java._Spring.dto;
 
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class OrderProductDto {
+    @NotNull
     private Long orderId;
+    @NotNull
     private Long productId;
+    @NotNull
     private Integer quantity;
+    @NotNull
     private double price;
-    private List<ProductDto> products;
-    private List<OrderDto> orders;
 }

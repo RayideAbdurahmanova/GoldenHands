@@ -36,13 +36,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto getById(Integer id) {
+        if(id<=0){
+            throw  new DataNotFoundException("Category ID cannot be less than 0");
+        }
         log.info("Starting retrieval of a category by id: {}", id);
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Data Not Found With ID:" + id + " CategoryID"));
         CategoryDto categoryDto=categoryMapper.toCategoryDtoGetById(category);
         log.info("Retrieved {} category successfully", categoryDto);
         return categoryDto;
-
     }
 
     @Override
@@ -70,6 +72,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto update(Integer id, CreateCategoryRequest createCategoryRequest) {
         log.info("Starting  update of category with ID: {} ", id);
+        if(id<=0){
+            throw  new DataNotFoundException("Category ID cannot be less than 0");
+        }
         Category existing = categoryRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Category with ID " + id + " not found"));
         if(!existing.getCategoryName().equals(createCategoryRequest.getCategoryName())&&
@@ -97,6 +102,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void delete(Integer id) {
         log.info("Starting  deletion of category with ID: {} ", id);
+        if(id<=0){
+            throw  new DataNotFoundException("Category ID cannot be less than 0");
+        }
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Category with ID " + id + " not found"));
         if (productRepository.countByCategory(category) > 0) {
@@ -111,11 +119,16 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getSubcategories(Integer parentId) {
         log.info("Starting retrieval of a parent category with id: {}", parentId);
+        if(parentId<=0){
+            throw  new DataNotFoundException("Parent category ID cannot be less than 0");
+        }
         Category parentCategory = categoryRepository.findById(parentId).orElseThrow(
                 () -> new DataNotFoundException("Category not found with :" + parentId)
         );
         List<Category> subCategories=categoryRepository.findByParentCategory(parentCategory);
         List<CategoryDto> categoryDtos=categoryMapper.toCategoryDtoList(subCategories);
+
+
         log.info("Finished retrieval {} parent category successfully", categoryDtos.size());
         return categoryDtos;
     }

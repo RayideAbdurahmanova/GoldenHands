@@ -6,6 +6,7 @@ import com.matrix.Java._Spring.dto.UserProfile;
 import com.matrix.Java._Spring.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +21,14 @@ public class CustomerController {
 
     @GetMapping("/profile")
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
+    @ResponseStatus(HttpStatus.OK)
     public UserProfile getMyProfile(){
         return customerService.getMyProfile();
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.OK)
     public List<CustomerDto> getUsers(){
         return customerService.getAll();
     }
