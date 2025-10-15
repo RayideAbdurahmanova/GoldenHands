@@ -7,20 +7,17 @@ import com.matrix.Java._Spring.dto.WishListProduct;
 import com.matrix.Java._Spring.exceptions.DataExistException;
 import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.JwtService;
-import com.matrix.Java._Spring.mapper.ProductMapper;
 import com.matrix.Java._Spring.mapper.WishListMapper;
-import com.matrix.Java._Spring.model.entity.Product;
 import com.matrix.Java._Spring.model.entity.User;
 import com.matrix.Java._Spring.model.entity.WishList;
-import com.matrix.Java._Spring.repository.CustomerRepository;
 import com.matrix.Java._Spring.repository.ProductRepository;
 import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.repository.WishListRepository;
 import com.matrix.Java._Spring.service.WishListService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +30,11 @@ import java.util.Optional;
 public class WishListServiceImpl implements WishListService {
 
 
-    private final CustomerRepository customerRepository;
     private final WishListRepository wishListRepository;
     private final WishListMapper wishListMapper;
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
 
     @Override
     public WishListDto getListByUserId() {
@@ -76,6 +71,7 @@ public class WishListServiceImpl implements WishListService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new DataNotFoundException("Customer not found with id: " + userId)
         );
+
         var product = productRepository.findById(Math.toIntExact(createWishListRequest.getProductId()))
                 .orElseThrow(() -> new DataNotFoundException("Product Not Found With ID:" + createWishListRequest.getProductId()));
 
@@ -110,6 +106,7 @@ public class WishListServiceImpl implements WishListService {
         var userId = jwtService.extractUserId(token);
         var user = userRepository.findById(userId)
                 .orElseThrow();
+
         WishList wishList = wishListRepository.findByUser(user)
                 .orElseThrow(() -> new DataNotFoundException("Wishlist not found with user: " + user));
 
@@ -130,6 +127,7 @@ public class WishListServiceImpl implements WishListService {
         var userId = jwtService.extractUserId(token);
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new DataNotFoundException("Customer not found with id: " + userId));
+
         WishList wishList = wishListRepository.findByUser(user)
                 .orElseThrow(() -> new DataNotFoundException("Wishlist not found with id: " + user.getWishLists().get(0).getId()));
         if (!wishList.getUser().getId().equals(userId)) {

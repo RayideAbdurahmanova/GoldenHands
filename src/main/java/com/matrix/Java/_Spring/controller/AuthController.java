@@ -25,8 +25,9 @@ public class AuthController {
     }
 
     @PostMapping("verify-account")
-    public String verifyAccount(@RequestParam String otp) {
-        authService.verifyAccount(otp);
+    public String verifyAccount(@RequestParam String otp,
+                                @RequestParam String email) {
+        authService.verifyAccount(otp,email);
         return "Your account has been verified. Please login app";
     }
 

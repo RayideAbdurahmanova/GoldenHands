@@ -3,7 +3,6 @@ package com.matrix.Java._Spring.controller;
 import com.matrix.Java._Spring.dto.RoleDto;
 import com.matrix.Java._Spring.dto.RoleRequest;
 import com.matrix.Java._Spring.exceptions.DataExistException;
-import com.matrix.Java._Spring.model.entity.Role;
 import com.matrix.Java._Spring.service.RoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/roles")
-@PreAuthorize("hasAuthority('ADMIN')")
 public class RoleController {
     private final RoleService roleService;
 
@@ -26,7 +24,7 @@ public class RoleController {
         roleService.createRole(request);
     }
 
-    @PostMapping("assing-role-toUser")
+    @PostMapping("assign-role-toUser")
     public void assignRoleToUser(@RequestParam Long userID,@RequestParam Long roleId) throws DataExistException {
         roleService.assignRoleToUser(userID,roleId);
     }

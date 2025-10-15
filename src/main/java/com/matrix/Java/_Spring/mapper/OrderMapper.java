@@ -13,6 +13,7 @@ public interface OrderMapper {
 
     @Mapping(target = "customerId", source = "customer.customerId")
     @Mapping(target = "orderProducts", source = "orderProducts")
+    @Mapping(target = "paymentStatus", constant = "SUCCESS")
     List<OrderDto> toOrderDtoList(List<Order> orders);
 
     @Mapping(target = "productId", source = "product.id")
@@ -22,13 +23,9 @@ public interface OrderMapper {
 
     @Mapping(target = "customerId", source = "customer.customerId")
     @Mapping(target = "shippingAddress", source = "address")
+    @Mapping(target = "paymentStatus", constant = "SUCCESS")
     OrderDto toOrderDtoGetById(Order order);
 
-
-    @Mapping(target = "orderId", ignore = true)
-    void updateOrderProductFromDto(CreateOrderRequest createOrderRequest, @MappingTarget Order order);
-
     @Mapping(target = "customer", source = "basket.customer")
-//@Mapping(target = "totalAmount", source = "basket.totalPrice")
     Order toOrder(CreateOrderRequest createOrderRequest, User user, Basket basket);
 }

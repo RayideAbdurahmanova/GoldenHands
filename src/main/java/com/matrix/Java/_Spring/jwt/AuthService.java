@@ -14,7 +14,7 @@ public interface AuthService {
 
     void sellerSignUp(SellerSignUp sellerSignUp);
 
-    void verifyAccount(String otp);
+    void verifyAccount(String otp, String email);
 
     void regenerateOtp(String email);
 

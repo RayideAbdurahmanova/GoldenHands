@@ -21,7 +21,6 @@ public class SellerController {
     private final SellerService sellerService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<SellerDto> getSellers() {
         return sellerService.getSellers();

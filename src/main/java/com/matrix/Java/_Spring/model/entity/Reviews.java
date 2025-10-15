@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
 
 @Entity
 @Table(name = "reviews")

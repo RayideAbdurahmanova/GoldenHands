@@ -4,8 +4,6 @@ import com.matrix.Java._Spring.dto.CreateWishListRequest;
 import com.matrix.Java._Spring.dto.WishListDto;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.List;
-
 public interface WishListService {
 
     WishListDto getListByUserId();

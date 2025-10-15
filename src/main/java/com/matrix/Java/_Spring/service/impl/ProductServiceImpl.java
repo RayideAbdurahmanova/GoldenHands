@@ -7,21 +7,21 @@ import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.JwtService;
 import com.matrix.Java._Spring.mapper.ProductMapper;
 import com.matrix.Java._Spring.mapper.ReviewsMapper;
-import com.matrix.Java._Spring.mapper.ReviewsMapperImpl;
 import com.matrix.Java._Spring.model.entity.Category;
 import com.matrix.Java._Spring.model.entity.Product;
-import com.matrix.Java._Spring.repository.*;
+import com.matrix.Java._Spring.repository.CategoryRepository;
+import com.matrix.Java._Spring.repository.CustomerRepository;
+import com.matrix.Java._Spring.repository.ProductRepository;
+import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -150,17 +150,25 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> getProductsByCategory(Integer categoryId) {
         log.info("Starting retrieval of products by category: {}", categoryId);
+
         if (categoryId <= 0) {
             throw new DataNotFoundException("Category ID must be positive");
         }
-        Category category = categoryRepository.findById(categoryId).orElseThrow(
-                () -> new DataNotFoundException("Category not found with: " + categoryId)
-        );
-        List<Product> product = productRepository.findByCategory(category);
-        List<ProductDto> productDtoList = reviewsMapper.getProductDtoList(product);
-        productDtoList.stream()
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new DataNotFoundException("Category not found with: " + categoryId));
+
+        List<Category> allCategories = new ArrayList<>();
+        allCategories.add(category);
+        allCategories.addAll(getAllSubcategories(category));
+
+        List<Product> products = productRepository.findByCategoryIn(allCategories);
+
+        List<ProductDto> productDtoList = reviewsMapper.getProductDtoList(products);
+
+        productDtoList = productDtoList.stream()
                 .map(productDto -> {
-                    Product p = product.stream()
+                    Product p = products.stream()
                             .filter(prd -> prd.getId().equals(productDto.getId()))
                             .findFirst()
                             .orElse(null);
@@ -175,7 +183,8 @@ public class ProductServiceImpl implements ProductService {
                     return productDto;
                 })
                 .toList();
-        log.info("Finished retrieval of products by category: {}", categoryId);
+
+        log.info("Finished retrieval of products by category: {}, total products: {}", categoryId, productDtoList.size());
         return productDtoList;
     }
 
@@ -190,5 +199,17 @@ public class ProductServiceImpl implements ProductService {
         log.info("Finished retrieval of products by seller: {}", sellerId);
         return productDtoList;
 
+    }
+
+    private List<Category> getAllSubcategories(Category category) {
+        List<Category> subcategories = categoryRepository.findByParentId(category.getId());
+        List<Category> allSubcategories = new ArrayList<>();
+
+        for (Category subcategory : subcategories) {
+            allSubcategories.add(subcategory);
+            allSubcategories.addAll(getAllSubcategories(subcategory));
+        }
+
+        return allSubcategories;
     }
 }

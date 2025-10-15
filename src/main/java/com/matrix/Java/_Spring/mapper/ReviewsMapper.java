@@ -6,10 +6,8 @@ import com.matrix.Java._Spring.dto.ProductDto;
 import com.matrix.Java._Spring.dto.ReviewsDto;
 import com.matrix.Java._Spring.model.entity.Product;
 import com.matrix.Java._Spring.model.entity.Reviews;
-import jdk.jfr.MemoryAddress;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 

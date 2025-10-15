@@ -25,18 +25,6 @@ public class Seller {
     @OneToMany(mappedBy = "seller")
     List<Product> products;
 
-//    @OneToMany(mappedBy = "seller")
-//    List<Order> orders;
-
-//    @OneToMany(mappedBy = "seller")
-//    List<Address> addresses;
-
-//    @OneToMany(mappedBy = "seller")
-//    List<Reviews> reviews;
-
     @OneToOne(mappedBy = "seller")
     private User user;
-
-//    @OneToOne(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private Balance balance;
 }

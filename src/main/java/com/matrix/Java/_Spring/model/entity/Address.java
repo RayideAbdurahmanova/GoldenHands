@@ -1,7 +1,6 @@
 package com.matrix.Java._Spring.model.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Data;
 import lombok.ToString;
 

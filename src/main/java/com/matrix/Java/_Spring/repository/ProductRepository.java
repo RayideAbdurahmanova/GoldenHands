@@ -26,4 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @EntityGraph(attributePaths = "reviews")
     List<Product> findBySellerId(Integer sellerId);
+
+    @EntityGraph(attributePaths = "reviews")
+    List<Product> findByCategoryIn(List<Category> allCategories);
 }

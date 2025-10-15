@@ -89,7 +89,6 @@ class ProductServiceImplTest {
         product.setPrice(100);
         product.setQuantityInStock(5);
         product.setDescription("Test Description");
-        product.setImageUrl("Image Url");
 
         productDto = new ProductDto();
         productDto.setId(1);

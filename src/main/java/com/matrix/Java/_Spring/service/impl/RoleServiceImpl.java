@@ -12,8 +12,6 @@ import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +48,10 @@ public class RoleServiceImpl implements RoleService {
         var role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
         user.getRoles().add(role);
+        if(roleId==3) {
+            removeRoleFromUser(userID, 2L);
+            log.info("Removed role {} from user", role);
+        }
         userRepository.save(user);
         log.info("Finishing assing role {}  to user {}", roleId, userID);
     }

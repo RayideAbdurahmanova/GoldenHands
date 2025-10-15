@@ -9,7 +9,7 @@ public class SellerSignUp {
     @NotBlank(message = "Email can not be null")
     private String email;
     @NotBlank(message = "Password can not be null")
-    @Size(min = 6, max = 20, message = "Size is incorrect")
+    @Size(min = 6, max = 20, message = "Password must contain at last 6 characters")
     private String password;
     @NotBlank(message = "Confirm password can not be null")
     private String confirmPassword;

@@ -11,7 +11,6 @@ import com.matrix.Java._Spring.model.entity.Customer;
 import com.matrix.Java._Spring.model.entity.User;
 import com.matrix.Java._Spring.repository.AddressRepository;
 import com.matrix.Java._Spring.repository.CustomerRepository;
-import com.matrix.Java._Spring.repository.SellerRepository;
 import com.matrix.Java._Spring.repository.UserRepository;
 import com.matrix.Java._Spring.service.AddressService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +32,6 @@ public class AddressServiceImpl implements AddressService {
     private final CustomerRepository customerRepository;
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final SellerRepository sellerRepository;
 
 
     @Override
@@ -57,20 +55,23 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDto getByCustomerId() {
+        log.info("Starting retrieval of address by customer id");
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Authenticated user email: {}", email);
         var user = userRepository.findByUsername(email).orElseThrow(
                 () -> new AccessDeniedException("User not found")
         );
-
-        log.info("Starting retrieval of customer with id {}", user.getCustomer().getCustomerId());
-        Customer customer = customerRepository.findById(user.getCustomer().getCustomerId())
-                .orElseThrow(() -> new DataNotFoundException("Address not found"));
-        Address address = addressRepository.findByCustomer(customer);
-        if (address == null) {
-            throw new DataNotFoundException("Address not found");
+        if (user.getAddress()== null) {
+            log.error("Address ID is null for user ID: {}", user.getId());
+            throw new DataNotFoundException("Address ID is null for USER:"+user.getId());
         }
+        log.info("User found: ID={}, Address ID from DB: {}", user.getId(), user.getAddress().getId());
+
+        Address address = addressRepository.findById(user.getAddress().getId())
+                .orElseThrow(() -> new DataNotFoundException("Address not found for ID: " + user.getAddress().getId()));
+        log.info("Address found: ID={}", address.getId());
         AddressDto addressDto = addressMapper.toAddressDtoGetById(address);
-        log.info("Finished retrieval {} address with Customer ID successfully", addressDto);
+        log.info("Finished retrieval of address with ID {} for user successfully", addressDto.getId());
         return addressDto;
     }
 
@@ -94,7 +95,7 @@ public class AddressServiceImpl implements AddressService {
             address.setCustomer(customer);
             user.setAddress(address);
             customer.setAddressEntity(address);
-            saved = addressRepository.save(address);
+            addressRepository.save(address);
             userRepository.save(user);
             customerRepository.save(customer);
         } else {
@@ -104,6 +105,5 @@ public class AddressServiceImpl implements AddressService {
             saved = addressRepository.save(existingAddress);
             log.info("Updating existing address : {}", saved);
         }
-//        log.info("Finishing creating of address with ID : {}", saved.getId());
     }
 }

@@ -19,14 +19,12 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping()
-    @PreAuthorize("hasAnyAuthority('ADMIN','SELLER','USER')")
     @ResponseStatus(HttpStatus.OK)
     public  List<CategoryDto> getCategoryList(){
         return categoryService.getList();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','SELLER','USER')")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDto getCategoryById(@PathVariable Integer id){
         return  categoryService.getById(id);
@@ -34,13 +32,11 @@ public class CategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public CategoryDto addCategory(@Valid @RequestBody CreateCategoryRequest createCategoryRequest){
         return categoryService.create(createCategoryRequest);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public CategoryDto updateCategory(@PathVariable Integer id,
                                       @RequestBody @Valid CreateCategoryRequest createCategoryRequest) {
         return  categoryService.update(id, createCategoryRequest);
@@ -48,13 +44,11 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteCategory(@PathVariable Integer id) {
         categoryService.delete(id);
     }
 
     @GetMapping("/parenId/{parentId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN','SELLER','USER')")
     @ResponseStatus(HttpStatus.OK)
     public List<CategoryDto> getSubcategories(@PathVariable Integer parentId) {
         return categoryService.getSubcategories(parentId);

@@ -38,9 +38,9 @@ public class Product {
 
     @Column(nullable = false, name = "stock_quantity")
     private Integer quantityInStock;
-
-    @Column(name = "image_url")
-    private String imageUrl;
+//
+//    @Column(name = "image_url")
+//    private String imageUrl;
 
     @OneToMany(mappedBy = "product")
     private List<Reviews> reviews;

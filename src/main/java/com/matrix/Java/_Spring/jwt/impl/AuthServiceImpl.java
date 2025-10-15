@@ -117,11 +117,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyAccount(String otp) {
+    public void verifyAccount(String otp, String email) {
         var user = userRepository.findByOtp(otp).
                 orElseThrow(() -> new DataNotFoundException("Otp is not found"));
-        if (Duration.between(user.getCreateOtpTime(), LocalDateTime.now()).getSeconds() > 60) {
+        if (Duration.between(user.getCreateOtpTime(), LocalDateTime.now()).getSeconds() > 120) {
             throw new DataNotFoundException("Otp is expired, please try regenerate otp");
+        }
+        if(!(user.getUsername().equals(email))) {
+            throw new DataNotFoundException("Email is not found");
         }
         user.setOtp(null);
         user.setEnabled(true);

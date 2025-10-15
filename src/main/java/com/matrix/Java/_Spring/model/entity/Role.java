@@ -1,7 +1,6 @@
 package com.matrix.Java._Spring.model.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

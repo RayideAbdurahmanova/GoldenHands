@@ -10,6 +10,7 @@ import com.matrix.Java._Spring.mapper.BasketMapper;
 import com.matrix.Java._Spring.model.entity.Basket;
 import com.matrix.Java._Spring.model.entity.BasketItem;
 import com.matrix.Java._Spring.model.entity.Product;
+import com.matrix.Java._Spring.repository.BasketItemRepository;
 import com.matrix.Java._Spring.repository.BasketRepository;
 import com.matrix.Java._Spring.repository.ProductRepository;
 import com.matrix.Java._Spring.repository.UserRepository;
@@ -18,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,7 @@ public class BasketServiceImpl implements BasketService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final BasketMapper basketMapper;
+    private final BasketItemRepository basketItemRepository;
 
     @Override
     @Transactional
@@ -57,6 +60,9 @@ public class BasketServiceImpl implements BasketService {
             basket.setCustomer(customer);
             BasketItem basketItem = new BasketItem();
             basketItem.setQuantity(basketRequest.getQuantity());
+            if(basketRequest.getQuantity() > product.getQuantityInStock()) {
+                throw new DataNotFoundException("Quantity Exceeds Stock");
+            }
             basketItem.setBasket(basket);
             basketItem.setProduct(product);
             basket.getItems().add(basketItem);
@@ -71,7 +77,11 @@ public class BasketServiceImpl implements BasketService {
                     .orElse(null);
 
             if (existingItem != null) {
-                existingItem.setQuantity(existingItem.getQuantity() + basketRequest.getQuantity());
+                int newQuantity = existingItem.getQuantity() + basketRequest.getQuantity();
+                if (newQuantity > product.getQuantityInStock()) {
+                    throw new DataNotFoundException("Quantity Exceeds Stock");
+                }
+                existingItem.setQuantity(newQuantity);
             } else {
                 BasketItem newItem = new BasketItem();
                 newItem.setQuantity(basketRequest.getQuantity());
@@ -110,6 +120,9 @@ public class BasketServiceImpl implements BasketService {
             var updatePrice = price.subtract(calculateTotalAmount(productId, quantity));
             basket.setTotalPrice(updatePrice);
             basketRepository.save(basket);
+            if(itemBasket.getQuantity() < 1) {
+                basketItemRepository.deleteById(itemBasket.getId());
+            }
         } else
             throw new RuntimeException("Basket is empty");
     }
@@ -123,7 +136,7 @@ public class BasketServiceImpl implements BasketService {
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
         Basket basket = basketRepository.findByCustomer_CustomerId(user.getCustomer().getCustomerId());
         if (basket == null) {
-            throw new RuntimeException("Basket not found for this user");
+            throw new DataNotFoundException("Basket not found for USER:"+ user.getCustomer().getCustomerId());
         }
         Hibernate.initialize(basket.getItems());
         basket.getItems().forEach(item -> Hibernate.initialize(item.getProduct()));

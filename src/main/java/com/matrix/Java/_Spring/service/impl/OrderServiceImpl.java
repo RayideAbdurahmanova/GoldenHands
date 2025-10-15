@@ -9,7 +9,6 @@ import com.matrix.Java._Spring.exceptions.DataNotFoundException;
 import com.matrix.Java._Spring.jwt.JwtService;
 import com.matrix.Java._Spring.mapper.OrderMapper;
 import com.matrix.Java._Spring.mapper.OrderProductMapper;
-import com.matrix.Java._Spring.mapper.ProductMapperImpl;
 import com.matrix.Java._Spring.model.entity.*;
 import com.matrix.Java._Spring.repository.*;
 import com.matrix.Java._Spring.service.AddressService;
@@ -18,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,6 @@ public class OrderServiceImpl implements OrderService {
     private final AddressService addressService;
     private final WalletClient walletClient;
     private final BasketRepository basketRepository;
-    private final ProductMapperImpl productMapperImpl;
 
 
     @Override
@@ -50,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = userRepository.findByUsername(email)
                 .orElseThrow();
+
         log.info("Starting retrieval of order list with ID: {}", user.getCustomer().getCustomerId());
         Customer customer = customerRepository.findById(user.getCustomer().getCustomerId())
                 .orElseThrow(() -> new DataNotFoundException("Data Not Found With ID:" + user.getCustomer().getCustomerId() + " OrderID"));
@@ -85,8 +85,8 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new DataNotFoundException("Customer not found"));
 
         var basket = basketRepository.findByCustomer_CustomerId(user.getCustomer().getCustomerId());
-        if (basket.getItems().isEmpty()) {
-            throw new DataNotFoundException("Basket is empty ID with user ID : " + userId);
+        if (basket == null || basket.getItems() == null || basket.getItems().isEmpty()) {
+            throw new DataNotFoundException("Basket is empty or not found for user ID: " + userId);
         }
 
         addressService.create(createOrderRequest.getCreateAddress(), request);
@@ -104,6 +104,7 @@ public class OrderServiceImpl implements OrderService {
         paymentRequest.setAmount(basket.getTotalPrice());
         paymentRequest.setCustomerId(user.getCustomer().getCustomerId());
 
+
         if (paymentRequest.getOrderId() == null || paymentRequest.getAmount() == null || paymentRequest.getCustomerId() == null) {
             log.error("Invalid PaymentRequest: orderId={}, amount={}, customerId={}",
                     paymentRequest.getOrderId(), paymentRequest.getAmount(), paymentRequest.getCustomerId());
@@ -111,26 +112,25 @@ public class OrderServiceImpl implements OrderService {
         }
 
         try {
-            walletClient.pay(request.getHeader("Authorization"), paymentRequest);
+            var status = walletClient.pay(request.getHeader("Authorization"), paymentRequest).getBody();
             savedOrder.setOrderStatus(OrderStatus.SHIPPED);
             log.info("Payment successful for order ID: {}. Order status updated to SHIPPED", savedOrder.getOrderId());
+            basketRepository.delete(basket);
+            OrderDto orderDto = orderMapper.toOrderDtoGetById(savedOrder);
+            var orderProductDto = orderProducts.stream()
+                    .map(orderProductMapper::toOrderProductDtoGetById)
+                    .toList();
 
-        } catch (Exception e) {
+            log.info("Finished creation of order  with id: {}", savedOrder.getOrderId());
+            orderDto.setOrderProducts(orderProductDto);
+            orderDto.setPaymentStatus(status);
+            return orderDto;
+        } catch (DataNotFoundException e) {
             savedOrder.setOrderStatus(OrderStatus.CANCELED);
             log.error("Payment failed for order ID: {}. Order status updated to CANCELED", savedOrder.getOrderId());
-            throw new RuntimeException(e.getMessage());
+            throw new DataNotFoundException(e.getMessage());
         }
-        basketRepository.delete(basket);
-        OrderDto orderDto = orderMapper.toOrderDtoGetById(savedOrder);
-        var orderProductDto = orderProducts.stream()
-                .map(orderProductMapper::toOrderProductDtoGetById)
-                .toList();
-
-        log.info("Finished creation of order  with id: {}", savedOrder.getOrderId());
-        orderDto.setOrderProducts(orderProductDto);
-        return orderDto;
     }
-
 
     private Order createNewOrder(CreateOrderRequest createOrderRequest, User user, Basket basket) {
         log.info("Starting creation of new order for address: {}",
@@ -184,6 +184,7 @@ public class OrderServiceImpl implements OrderService {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = userRepository.findByUsername(email)
                 .orElseThrow();
+
         var order = orderRepository.findByOrderIdAndCustomerCustomerId(id, user.getCustomer().getCustomerId())
                 .orElseThrow(() -> new DataNotFoundException("Order with ID " + id + " not found"));
         return orderMapper.toOrderDtoGetById(order);

@@ -6,15 +6,11 @@ import com.matrix.Java._Spring.dto.WishListDto;
 import com.matrix.Java._Spring.service.WishListService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +30,6 @@ public class WishListController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('USER')")
     public WishListDto create(@Valid @RequestBody CreateWishListRequest createWishListRequest,
                               HttpServletRequest request) {
         return wishListService.create(createWishListRequest, request);

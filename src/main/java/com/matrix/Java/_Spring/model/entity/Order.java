@@ -1,13 +1,9 @@
 package com.matrix.Java._Spring.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.matrix.Java._Spring.enums.OrderStatus;
-import com.matrix.Java._Spring.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,10 +35,6 @@ public class Order {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;
-
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id")
-    private Seller seller;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

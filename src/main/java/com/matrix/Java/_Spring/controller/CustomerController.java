@@ -20,21 +20,18 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("/profile")
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @ResponseStatus(HttpStatus.OK)
     public UserProfile getMyProfile(){
         return customerService.getMyProfile();
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<CustomerDto> getUsers(){
         return customerService.getAll();
     }
 
     @PutMapping("change-password")
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN','SELLER')")
     public void changePassword(@RequestBody @Valid ChangePasswordRequest changePasswordRequest){
         customerService.changePassword(changePasswordRequest);
     }

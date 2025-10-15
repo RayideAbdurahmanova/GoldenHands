@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -91,7 +92,6 @@ public class ReviewServiceImpl implements ReviewsService {
         return reviewsDtos;
     }
 
-
     @Override
     public ReviewsDto create(CreateReviewsRequest createReviewsRequest, HttpServletRequest request) {
         log.info("Starting creation of review : {}", createReviewsRequest);
@@ -99,6 +99,7 @@ public class ReviewServiceImpl implements ReviewsService {
         var userId = jwtService.extractUserId(token);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("Customer not found"));
+
         var order = orderRepository
                 .findByOrderIdAndCustomerCustomerId(createReviewsRequest.getOrderId()
                         , user.getCustomer().getCustomerId())
@@ -143,7 +144,7 @@ public class ReviewServiceImpl implements ReviewsService {
         if (!reviews.getProduct().getId().equals(createReviewsRequest.getProductId())) {
             log.error("Product ID {} does not match review's product ID {}",
                     createReviewsRequest.getProductId(), reviews.getProduct().getId());
-            throw new IllegalArgumentException("Product ID does not match review's product");
+            throw new DataNotFoundException("Product ID does not match review's product");
         }
 
         if (createReviewsRequest.getComment() != null && !createReviewsRequest.getComment().isEmpty()) {
